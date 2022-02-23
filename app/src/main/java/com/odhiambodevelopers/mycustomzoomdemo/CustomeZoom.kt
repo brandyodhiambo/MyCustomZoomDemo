@@ -12,7 +12,7 @@ import androidx.appcompat.widget.AppCompatImageView
 
 class CustomeZoom: AppCompatImageView, View.OnTouchListener,
     GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
-    //Construction details
+     //Construction details
     private var myContext: Context? = null
     private var myScaleDetector: ScaleGestureDetector? = null
     private var myGestureDetector: GestureDetector? = null
@@ -41,8 +41,8 @@ class CustomeZoom: AppCompatImageView, View.OnTouchListener,
         constructionDetails(context)
     }
 
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context!!,
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
         attrs,
         defStyleAttr
     )
@@ -77,12 +77,12 @@ class CustomeZoom: AppCompatImageView, View.OnTouchListener,
             if (originalWidth * presentScale <= mViewedWidth
                 || originalHeight * presentScale <= mViewedHeight
             ) {
-                myMatrix!!.postScale(
+                myMatrix?.postScale(
                     mScaleFactor, mScaleFactor, mViewedWidth / 2.toFloat(),
                     mViewedHeight / 2.toFloat()
                 )
             } else {
-                myMatrix!!.postScale(
+                myMatrix?.postScale(
                     mScaleFactor, mScaleFactor,
                     detector.focusX, detector.focusY
                 )
@@ -102,7 +102,7 @@ class CustomeZoom: AppCompatImageView, View.OnTouchListener,
         val factorX = mViewedWidth.toFloat() / mImageWidth.toFloat()
         val factorY = mViewedHeight.toFloat() / mImageHeight.toFloat()
         factor = factorX.coerceAtMost(factorY)
-        myMatrix!!.setScale(factor, factor)
+        myMatrix?.setScale(factor, factor)
 
         // Centering the image
         var repeatedYSpace = (mViewedHeight.toFloat()
@@ -111,20 +111,20 @@ class CustomeZoom: AppCompatImageView, View.OnTouchListener,
                 - factor * mImageWidth.toFloat())
         repeatedYSpace /= 2.toFloat()
         repeatedXSpace /= 2.toFloat()
-        myMatrix!!.postTranslate(repeatedXSpace, repeatedYSpace)
+        myMatrix?.postTranslate(repeatedXSpace, repeatedYSpace)
         originalWidth = mViewedWidth - 2 * repeatedXSpace
         originalHeight = mViewedHeight - 2 * repeatedYSpace
         imageMatrix = myMatrix
     }
     fun fittedTranslation() {
-        myMatrix!!.getValues(matrixValue)
+        myMatrix?.getValues(matrixValue)
         val translationX =
-            matrixValue!![Matrix.MTRANS_X]
+            matrixValue?.get(Matrix.MTRANS_X)?:0f
         val translationY =
-            matrixValue!![Matrix.MTRANS_Y]
+            matrixValue?.get(Matrix.MTRANS_Y)?:0f
         val fittedTransX = getFittedTranslation(translationX, mViewedWidth.toFloat(), originalWidth * presentScale)
         val fittedTransY = getFittedTranslation(translationY, mViewedHeight.toFloat(), originalHeight * presentScale)
-        if (fittedTransX != 0f || fittedTransY != 0f) myMatrix!!.postTranslate(fittedTransX, fittedTransY)
+        if (fittedTransX != 0f || fittedTransY != 0f) myMatrix?.postTranslate(fittedTransX, fittedTransY)
     }
 
     private fun getFittedTranslation(mTranslate: Float,vSize: Float, cSize: Float): Float {
@@ -162,14 +162,14 @@ class CustomeZoom: AppCompatImageView, View.OnTouchListener,
         }
     }
     override fun onTouch(mView: View, mMouseEvent: MotionEvent): Boolean {
-        myScaleDetector!!.onTouchEvent(mMouseEvent)
-        myGestureDetector!!.onTouchEvent(mMouseEvent)
+        myScaleDetector?.onTouchEvent(mMouseEvent)
+        myGestureDetector?.onTouchEvent(mMouseEvent)
         val currentPoint = PointF(mMouseEvent.x, mMouseEvent.y)
 
-        val mDisplay = this.display
+        val metrics = this.resources.displayMetrics
         val mLayoutParams = this.layoutParams
-        mLayoutParams.width = mDisplay.width
-        mLayoutParams.height = mDisplay.height
+        mLayoutParams.width = metrics.widthPixels
+        mLayoutParams.height = metrics.heightPixels
         this.layoutParams = mLayoutParams
         when (mMouseEvent.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -182,7 +182,7 @@ class CustomeZoom: AppCompatImageView, View.OnTouchListener,
                 val changeInY = currentPoint.y - lastPoint.y
                 val fixedTranslationX = getFixDragTrans(changeInX, mViewedWidth.toFloat(), originalWidth * presentScale)
                 val fixedTranslationY = getFixDragTrans(changeInY, mViewedHeight.toFloat(), originalHeight * presentScale)
-                myMatrix!!.postTranslate(fixedTranslationX, fixedTranslationY)
+                myMatrix?.postTranslate(fixedTranslationX, fixedTranslationY)
                 fittedTranslation()
                 lastPoint[currentPoint.x] = currentPoint.y
             }
